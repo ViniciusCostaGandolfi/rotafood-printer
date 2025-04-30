@@ -8,7 +8,13 @@ plugins {
 }
 
 kotlin {
-    jvm("desktop")
+    jvmToolchain(11)                       // <- basta isso na 1.9+
+
+    jvm("desktop") {
+        compilations.all {
+            kotlinOptions.jvmTarget = "11"
+        }
+    }
 
     sourceSets {
         val desktopMain by getting
@@ -39,27 +45,35 @@ kotlin {
 }
 
 
-compose.desktop {
-    application {
-        mainClass = "br.com.rotafood.MainKt"
 
-        nativeDistributions {
-            targetFormats( TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
+compose {
+    resources {
+        packageOfResClass = "br.com.rotafood.res"
+        generateResClass = auto
+        publicResClass = true
+    }
+    desktop {
+        application {
+            mainClass = "br.com.rotafood.MainKt"
+            buildTypes.release.proguard.isEnabled.set(false)
+            nativeDistributions {
+                targetFormats( TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
 
-            packageName = "RotaFood Printer"
-            packageVersion = "1.0.0"
-            description   = "Gerenciador de impressão RotaFood"
-            vendor        = "RotaFood Ltda."
-            copyright     = "© 2025 RotaFood"
+                packageName = "RotaFood Printer"
+                packageVersion = "1.0.0"
+                description   = "Gerenciador de impressão RotaFood"
+                vendor        = "RotaFood Ltda."
+                copyright     = "© 2025 RotaFood"
 
-            windows {
-                upgradeUuid = "d56a3b35-12a3-4bde-9c6b-4f9b2b1f74f1"
-                msiPackageVersion = "1.0.0"
-                exePackageVersion = "1.0.0"
-                iconFile.set(project.file("resources/icon.ico"))
-            }
-            linux {
-                iconFile.set(project.file("resources/icon.png"))
+                windows {
+                    upgradeUuid = "d56a3b35-12a3-4bde-9c6b-4f9b2b1f74f1"
+                    msiPackageVersion = "1.0.0"
+                    exePackageVersion = "1.0.0"
+                    iconFile.set(project.file("resources/iconIco.ico"))
+                }
+                linux {
+                    iconFile.set(project.file("resources/iconPng.png"))
+                }
             }
         }
     }
