@@ -6,6 +6,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 import androidx.compose.ui.unit.dp
 import utils.JwtUtils
@@ -55,6 +56,7 @@ fun TokenGatePage(onTokenReady: (String) -> Unit) {
                 tokenInput = it
                 errorMessage = null
             },
+            visualTransformation = PasswordVisualTransformation(),
             label = { Text("Cole aqui o seu token JWT") },
             modifier = Modifier.fillMaxWidth()
         )

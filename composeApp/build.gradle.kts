@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+version = "1.0.0"
+
 kotlin {
     jvmToolchain(11)                       // <- basta isso na 1.9+
 
@@ -32,12 +34,17 @@ kotlin {
             implementation("io.ktor:ktor-client-websockets:2.3.7")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
             implementation("org.apache.pdfbox:pdfbox:2.0.31")
+            implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+            implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+            implementation("org.slf4j:slf4j-simple:2.0.7")
 
         }
 
@@ -60,15 +67,14 @@ compose {
                 targetFormats( TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
 
                 packageName = "RotaFood Printer"
-                packageVersion = "1.0.0"
+                packageVersion = project.version as String?
                 description   = "Gerenciador de impressão RotaFood"
                 vendor        = "RotaFood Ltda."
                 copyright     = "© 2025 RotaFood"
 
                 windows {
-                    upgradeUuid = "d56a3b35-12a3-4bde-9c6b-4f9b2b1f74f1"
-                    msiPackageVersion = "1.0.0"
-                    exePackageVersion = "1.0.0"
+                    msiPackageVersion = project.version as String?
+                    exePackageVersion = project.version as String?
                     iconFile.set(project.file("resources/iconIco.ico"))
                 }
                 linux {
@@ -76,5 +82,11 @@ compose {
                 }
             }
         }
+    }
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Implementation-Version"] = project.version
     }
 }

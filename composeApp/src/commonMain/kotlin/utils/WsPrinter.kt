@@ -24,7 +24,7 @@ class WsPrinter(
 
     fun start() = scope.launch {
         client.webSocket(
-            urlString = "wss://api.rotafood.com.br/v1/ws/print?token=$token",
+            urlString = "wss://rotafood-api-production.up.railway.app/v1/ws/print?token=$token",
         ) {
             println("WS conectado ✓")
             for (msg in incoming) {
@@ -38,7 +38,7 @@ class WsPrinter(
     }
 
     fun stop() {
-        scope.cancel()     // cancela todas as corrotinas
-        client.close()     // fecha o HttpClient
+        scope.cancel()
+        client.close()
     }
 }

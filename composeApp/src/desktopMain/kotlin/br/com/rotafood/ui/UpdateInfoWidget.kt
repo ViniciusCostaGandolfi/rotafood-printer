@@ -3,27 +3,58 @@ package br.com.rotafood.ui
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import java.awt.Desktop
-import java.security.MessageDigest
+import javax.swing.JOptionPane
 import kotlin.system.exitProcess
+import kotlin.io.path.createTempFile
+import kotlinx.serialization.json.Json
+import io.ktor.serialization.kotlinx.json.*
 
 @Serializable
-private data class UpdateInfo(val version: String, val url: String, val sha256: String)
+private data class UpdateInfo(
+    val lastVersion: String,
+    val downloadLink: String
+)
+
+private fun createClient() = HttpClient(CIO) {
+    install(ContentNegotiation) {
+        json(Json {
+            ignoreUnknownKeys = true
+            prettyPrint       = false
+            isLenient         = true
+        })
+    }
+}
 
 object UpdateCheckerWidget {
-    private const val MANIFEST_URL =
-        "https://bucket-production-ec49.up.railway.app/rotafood/printer/update.json"
+
+
+    private const val UPDATE_URL =
+        "https://rotafood-bucket.up.railway.app/rotafood/printer/update.json"
 
     suspend fun run(currentVersion: String) = coroutineScope {
-        val client = HttpClient(CIO)
-        val info: UpdateInfo = client.get(MANIFEST_URL).body()
+        val client = createClient()
+        val info: UpdateInfo = client.get(UPDATE_URL).body()
 
-        if (isNewer(info.version, currentVersion)) {
-            println("Nova versão disponível: ${info.version}")
-            downloadAndInstall(info)
+        if (isNewer(info.lastVersion, currentVersion)) {
+            val message = "Nova versão disponível: ${info.lastVersion}\nDeseja baixar e instalar agora?"
+            val choice = JOptionPane.showConfirmDialog(
+                null,
+                message,
+                "Atualização Disponível",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE
+            )
+
+            if (choice == JOptionPane.YES_OPTION) {
+                downloadAndInstall(info.downloadLink)
+            } else {
+                println("Atualização cancelada pelo usuário.")
+            }
         } else {
             println("Já está na versão mais recente ($currentVersion)")
         }
@@ -33,7 +64,6 @@ object UpdateCheckerWidget {
         val r = remote.split('.').map { it.toIntOrNull() ?: 0 }
         val l = local.split('.').map { it.toIntOrNull() ?: 0 }
         val max = maxOf(r.size, l.size)
-
         for (i in 0 until max) {
             val rv = r.getOrElse(i) { 0 }
             val lv = l.getOrElse(i) { 0 }
@@ -42,24 +72,18 @@ object UpdateCheckerWidget {
         return false
     }
 
-
-    private suspend fun downloadAndInstall(info: UpdateInfo) {
-        val tmpFile = kotlin.io.path.createTempFile(suffix = ".msi").toFile()
-        println("Baixando instalador para ${tmpFile.name}")
+    private suspend fun downloadAndInstall(downloadLink: String) {
+        val suffix = downloadLink.substringAfterLast('.', ".msi")
+        val tmp = createTempFile(suffix = suffix).toFile()
+        println("Baixando instalador para ${tmp.absolutePath}…")
 
         HttpClient(CIO).use { client ->
-            client.get(info.url).body<ByteArray>().also { bytes ->
-                val digest = MessageDigest.getInstance("SHA-256")
-                    .digest(bytes).joinToString("") { "%02x".format(it) }
-                require(digest.equals(info.sha256, ignoreCase = true)) {
-                    "SHA-256 não confere!"
-                }
-                tmpFile.writeBytes(bytes)
-            }
+            val bytes: ByteArray = client.get(downloadLink).body()
+            tmp.writeBytes(bytes)
         }
 
         println("Abrindo instalador…")
-        Desktop.getDesktop().open(tmpFile)
+        Desktop.getDesktop().open(tmp)
         exitProcess(0)
     }
 }
