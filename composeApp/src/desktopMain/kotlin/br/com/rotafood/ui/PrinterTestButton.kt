@@ -64,10 +64,10 @@ fun PrinterTestButton(
             printText(
                 printerName = selectedPrinter,
                 text        = sampleText,
-                widthMm     = pageWidth,
-                fontSizePt  = fontSize,
-                marginMm    = pageMargin,
-                spacingPt   = spacingBetweenPrints
+                widthMmStr     = pageWidth,
+                fontSizePtStr  = fontSize,
+                marginMmStr    = pageMargin,
+                spacingPtStr   = spacingBetweenPrints
             )
         },
         enabled = selectedPrinter != null,

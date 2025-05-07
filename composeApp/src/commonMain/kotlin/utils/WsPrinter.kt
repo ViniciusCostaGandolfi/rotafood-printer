@@ -34,11 +34,15 @@ class WsPrinter(
             for (msg in incoming) {
                 when (msg) {
                     is Frame.Binary -> {
-                        val text = msg.readBytes().decodeToString()   // assume UTF‑8
+                        val text = msg.readBytes().decodeToString()
                         printText(
-                            printerName, text,
-                            widthMm,  heightMm,
-                            fontSizePt, marginMm
+                            printerName,
+                            text,
+                            widthMm,
+                            fontSizePt,
+                            marginMm ,
+
+                            heightMm
                         )
                     }
                     is Frame.Text -> println("Texto recebido: " + msg.readText())
