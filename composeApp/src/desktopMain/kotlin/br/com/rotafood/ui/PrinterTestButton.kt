@@ -10,7 +10,7 @@ import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType1Font
-import utils.printText
+import printText
 import javax.print.DocFlavor
 import javax.print.PrintServiceLookup
 import javax.print.SimpleDoc
@@ -19,7 +19,6 @@ import javax.print.SimpleDoc
 fun PrinterTestButton(
     selectedPrinter: String?,
     pageWidth: String,
-    pageHeight: String,
     fontSize: String,
     pageMargin: String,
     spacingBetweenPrints: String
@@ -66,7 +65,6 @@ fun PrinterTestButton(
                 printerName = selectedPrinter,
                 text        = sampleText,
                 widthMm     = pageWidth,
-                heightMm    = pageHeight,
                 fontSizePt  = fontSize,
                 marginMm    = pageMargin,
                 spacingPt   = spacingBetweenPrints

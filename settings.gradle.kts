@@ -8,6 +8,7 @@ pluginManagement {
                 includeGroupAndSubgroups("androidx")
                 includeGroupAndSubgroups("com.android")
                 includeGroupAndSubgroups("com.google")
+                mavenCentral()
             }
         }
         mavenCentral()
@@ -22,6 +23,8 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("androidx")
                 includeGroupAndSubgroups("com.android")
                 includeGroupAndSubgroups("com.google")
+                mavenCentral()
+                maven { url = uri("https://jitpack.io") }
             }
         }
         mavenCentral()
