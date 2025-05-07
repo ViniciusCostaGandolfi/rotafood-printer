@@ -1,18 +1,18 @@
 package br.com.rotafood.ui
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.okhttp.OkHttp        // ← engine correto
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.*
-import kotlinx.coroutines.*
+import io.ktor.client.request.get
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.awt.Desktop
 import javax.swing.JOptionPane
-import kotlin.system.exitProcess
 import kotlin.io.path.createTempFile
-import kotlinx.serialization.json.Json
-import io.ktor.serialization.kotlinx.json.*
+import kotlin.system.exitProcess
 
 @Serializable
 private data class UpdateInfo(
@@ -20,18 +20,19 @@ private data class UpdateInfo(
     val downloadLink: String
 )
 
-private fun createClient() = HttpClient(CIO) {
+private fun createClient() = HttpClient(OkHttp) {   // ← aqui também
     install(ContentNegotiation) {
-        json(Json {
-            ignoreUnknownKeys = true
-            prettyPrint       = false
-            isLenient         = true
-        })
+        json(
+            Json {
+                ignoreUnknownKeys = true
+                prettyPrint       = false
+                isLenient         = true
+            }
+        )
     }
 }
 
 object UpdateCheckerWidget {
-
 
     private const val UPDATE_URL =
         "https://rotafood-bucket.up.railway.app/rotafood/printer/update.json"
@@ -41,10 +42,9 @@ object UpdateCheckerWidget {
         val info: UpdateInfo = client.get(UPDATE_URL).body()
 
         if (isNewer(info.lastVersion, currentVersion)) {
-            val message = "Nova versão disponível: ${info.lastVersion}\nDeseja baixar e instalar agora?"
             val choice = JOptionPane.showConfirmDialog(
                 null,
-                message,
+                "Nova versão disponível: ${info.lastVersion}\nDeseja baixar e instalar agora?",
                 "Atualização Disponível",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.INFORMATION_MESSAGE
@@ -77,7 +77,7 @@ object UpdateCheckerWidget {
         val tmp = createTempFile(suffix = suffix).toFile()
         println("Baixando instalador para ${tmp.absolutePath}…")
 
-        HttpClient(CIO).use { client ->
+        HttpClient(OkHttp).use { client ->          // ← engine OkHttp aqui também
             val bytes: ByteArray = client.get(downloadLink).body()
             tmp.writeBytes(bytes)
         }
