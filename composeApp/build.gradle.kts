@@ -10,7 +10,7 @@ plugins {
 version = "1.0.0"
 
 kotlin {
-    jvmToolchain(11)                       // <- basta isso na 1.9+
+    jvmToolchain(11)
 
     jvm("desktop") {
         compilations.all {
@@ -36,6 +36,8 @@ kotlin {
             implementation("org.apache.pdfbox:pdfbox:2.0.31")
             implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+            implementation("io.ktor:ktor-client-okhttp:2.3.7")
+
 
         }
         desktopMain.dependencies {
