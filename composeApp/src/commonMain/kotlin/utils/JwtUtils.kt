@@ -9,7 +9,6 @@ object JwtUtils {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    /** Extrai o claim "merchantUser" para MerchantUserDto ou null. */
     fun decode(token: String): MerchantUserDto? = try {
         val payload = token.split(".").getOrNull(1) ?: return null
         val jsonStr = Base64.getUrlDecoder().decode(payload).toString(Charsets.UTF_8)
@@ -18,11 +17,10 @@ object JwtUtils {
         val merchantUserElement = root["merchantUser"] ?: return null
         json.decodeFromJsonElement<MerchantUserDto>(merchantUserElement)
     } catch (e: Exception) {
-        e.printStackTrace()                  // <- loga motivo real
+        e.printStackTrace()
         null
     }
 
-    /** Estrutura = 3 partes e expiração futura (`exp`). */
     fun isValid(token: String): Boolean = try {
         val parts = token.split(".")
 

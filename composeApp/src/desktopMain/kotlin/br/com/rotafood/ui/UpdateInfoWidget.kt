@@ -20,7 +20,7 @@ private data class UpdateInfo(
     val downloadLink: String
 )
 
-private fun createClient() = HttpClient(OkHttp) {   // ← aqui também
+private fun createClient() = HttpClient(OkHttp) {
     install(ContentNegotiation) {
         json(
             Json {
@@ -73,11 +73,11 @@ object UpdateCheckerWidget {
     }
 
     private suspend fun downloadAndInstall(downloadLink: String) {
-        val suffix = downloadLink.substringAfterLast('.', ".msi")
+        val suffix = downloadLink.substringAfterLast('.', ".exe")
         val tmp = createTempFile(suffix = suffix).toFile()
         println("Baixando instalador para ${tmp.absolutePath}…")
 
-        HttpClient(OkHttp).use { client ->          // ← engine OkHttp aqui também
+        HttpClient(OkHttp).use { client ->
             val bytes: ByteArray = client.get(downloadLink).body()
             tmp.writeBytes(bytes)
         }

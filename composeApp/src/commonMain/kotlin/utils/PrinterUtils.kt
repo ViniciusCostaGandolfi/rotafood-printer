@@ -1,74 +1,64 @@
-package utils
-
-import org.apache.pdfbox.pdmodel.*
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDType1Font
-import javax.print.DocFlavor
+import com.github.anastaciocintra.escpos.EscPos
+import com.github.anastaciocintra.escpos.Style
+import com.github.anastaciocintra.output.PrinterOutputStream
 import javax.print.PrintServiceLookup
-import javax.print.SimpleDoc
 
+private fun ptsToFontSize(pts: Float): Style.FontSize = when (pts.toInt()) {
+    in  0..11 -> Style.FontSize._1
+    in 12..17 -> Style.FontSize._2
+    in 18..23 -> Style.FontSize._3
+    in 24..29 -> Style.FontSize._4
+    in 30..35 -> Style.FontSize._5
+    in 36..41 -> Style.FontSize._6
+    in 42..47 -> Style.FontSize._7
+    else      -> Style.FontSize._8
+}
 
 fun printText(
     printerName: String?,
     text: String,
     widthMm: String,
-    heightMm: String,
     fontSizePt: String,
     marginMm: String,
     spacingPt: String
 ) {
-    val printerService = PrintServiceLookup.lookupPrintServices(null, null)
-        .firstOrNull { it.name == printerName } ?: run {
-        println("Impressora \"$printerName\" não encontrada."); return
+    val service = PrintServiceLookup.lookupPrintServices(null, null)
+        .firstOrNull { it.name == printerName }
+        ?: run {
+            println("Impressora \"$printerName\" não encontrada."); return
+        }
+
+    val colPerLine = when ((widthMm.toFloatOrNull() ?: 58f).toInt()) {
+        in 70..79 -> 48 else -> 32
     }
+    val marginSpaces = ((marginMm.toFloatOrNull() ?: 0f) / 58f * colPerLine).toInt()
+        .coerceAtMost(colPerLine / 4)
 
-    val wPt  = (widthMm .toFloatOrNull() ?: 58f) / 25.4f * 72f
-    val hPt  = (heightMm.toFloatOrNull() ?: 80f) / 25.4f * 72f
-    val mPt  = (marginMm.toFloatOrNull() ?: 5f)  / 25.4f * 72f
-    val fPt  = fontSizePt.toFloatOrNull() ?: 10f
-    val extra = spacingPt.toFloatOrNull() ?: 2f
-    val lineH = (fPt * 1.2f) + extra
+    val indent  = " ".repeat(marginSpaces)
+    val maxLine = colPerLine - marginSpaces
 
-    val availW          = wPt - 2 * mPt
-    val avgCharW        = fPt * 0.6f
-    val maxChars        = (availW / avgCharW).toInt()
-    val indent          = "   "
-    val processedLines  = buildList {
-        for (raw in text.split('\n')) {
+    val wrapped = buildList {
+        text.split('\n').forEach { raw ->
             var cur = ""
-            for (word in raw.split(' ')) {
+            raw.split(' ').forEach { word ->
                 if (cur.isEmpty()) cur = word
-                else if (cur.length + 1 + word.length <= maxChars) cur += " $word"
-                else { add(cur); cur = indent + word }
+                else if (cur.length + 1 + word.length <= maxLine) cur += " $word"
+                else { add(cur); cur = word }
             }
-            if (cur.isNotEmpty()) add(cur)
+            if (cur.isNotBlank()) add(cur)
         }
     }
 
-    val usableH = hPt - 2 * mPt
-    val maxLinesPerPage = (usableH / lineH).toInt()
+    PrinterOutputStream(service).use { stream ->
+        EscPos(stream).use { esc ->
+            val size = ptsToFontSize(fontSizePt.toFloatOrNull() ?: 10f)
+            val style = Style().setFontSize(size, size)
 
-    val doc = PDDocument()
-    var idx = 0
-    while (idx < processedLines.size) {
-        val page = PDPage(PDRectangle(wPt, hPt)); doc.addPage(page)
-        PDPageContentStream(doc, page).use { cs ->
-            cs.beginText()
-            cs.setFont(PDType1Font.COURIER, fPt)
-            cs.setLeading(lineH)
-            cs.newLineAtOffset(mPt, page.mediaBox.height - mPt)
-            for (i in idx until (idx + maxLinesPerPage).coerceAtMost(processedLines.size)) {
-                if (i != idx) cs.newLine()
-                cs.showText(processedLines[i])
-            }
-            cs.endText()
+            spacingPt.toFloatOrNull()?.let { esc.feed(it.toInt()) }
+
+            for (line in wrapped) esc.write(style, indent + line).feed(1)
+
+            esc.feed(3).cut(EscPos.CutMode.FULL)
         }
-        idx += maxLinesPerPage
     }
-
-    val bytes = java.io.ByteArrayOutputStream().also { doc.save(it) }.toByteArray()
-    doc.close()
-
-    printerService.createPrintJob()
-        .print(SimpleDoc(bytes, DocFlavor.BYTE_ARRAY.AUTOSENSE, null), null)
 }

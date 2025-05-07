@@ -14,8 +14,7 @@ import br.com.rotafood.ui.*
 import kotlinx.coroutines.launch
 import model.MerchantUserDto
 import utils.TokenStore
-import utils.WsPrinter                // ← novo import
-import utils.printText
+import utils.WsPrinter
 import javax.print.PrintServiceLookup
 
 @Composable
@@ -49,14 +48,21 @@ fun PrinterManagerPage(
             .firstOrNull { it.name == printerName } ?: return
 
         wsPrinter?.stop()
-        wsPrinter = WsPrinter(token, service, pageWidth.toIntOrNull() ?: 58)
-            .also { printer ->
-                scope.launch {
-                    printer.start()
-                    connected = true
-                }
+        wsPrinter = WsPrinter(
+            token        = token,
+            printerName  = selectedPrinter,
+            widthMm      = pageWidth,
+            heightMm     = pageHeight,
+            fontSizePt   = fontSize,
+            marginMm     = pageMargin
+        ).also { printer ->
+            scope.launch {
+                printer.start()
+                connected = true
             }
+        }
     }
+
 
     fun stopWs() {
         wsPrinter?.stop()
@@ -98,13 +104,12 @@ fun PrinterManagerPage(
         PageHeightWidget(pageHeight)                         { pageHeight     = it }
         FontSizeWidget(fontSize)                             { fontSize       = it }
         PageMarginWidget(pageMargin)                         { pageMargin     = it }
-        SpacingBetweenPrintsWidget(spacingBetween)           { spacingBetween = it }
 
         Spacer(Modifier.height(24.dp))
 
         PrinterTestButton(
             selectedPrinter, pageWidth, pageHeight,
-            fontSize, pageMargin, spacingBetween
+            fontSize, pageMargin
         )
     }
 }

@@ -12,11 +12,7 @@ version = "1.0.0"
 kotlin {
     jvmToolchain(11)
 
-    jvm("desktop") {
-        compilations.all {
-            kotlinOptions.jvmTarget = "11"
-        }
-    }
+    jvm("desktop")
 
     sourceSets {
         val desktopMain by getting
@@ -34,6 +30,8 @@ kotlin {
             implementation("io.ktor:ktor-client-websockets:2.3.7")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
             implementation("org.apache.pdfbox:pdfbox:2.0.31")
+            implementation("com.github.anastaciocintra:escpos-coffee:4.1.0")
+            implementation("org.usb4java:usb4java:1.3.0")
             implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
             implementation("io.ktor:ktor-client-okhttp:2.3.7")
@@ -75,8 +73,11 @@ compose {
                 copyright     = "© 2025 RotaFood"
 
                 windows {
-                    msiPackageVersion = project.version as String?
-                    exePackageVersion = project.version as String?
+                    menuGroup        = "RotaFood"
+                    shortcut         = true
+                    perUserInstall   = true
+                    msiPackageVersion = project.version as String
+                    exePackageVersion = project.version as String
                     iconFile.set(project.file("resources/iconIco.ico"))
                 }
                 linux {
