@@ -101,15 +101,15 @@ fun PrinterManagerPage(
 
         PrinterSelectWidget(printerList, selectedPrinter)   { selectedPrinter = it }
         PageWidthWidget(pageWidth)                           { pageWidth      = it }
-        PageHeightWidget(pageHeight)                         { pageHeight     = it }
         FontSizeWidget(fontSize)                             { fontSize       = it }
         PageMarginWidget(pageMargin)                         { pageMargin     = it }
-
         Spacer(Modifier.height(24.dp))
 
         PrinterTestButton(
-            selectedPrinter, pageWidth, pageHeight,
-            fontSize, pageMargin
+            selectedPrinter,
+            pageWidth, fontSize,
+            pageMargin,
+            pageMargin
         )
     }
 }

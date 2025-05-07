@@ -18,7 +18,6 @@ import utils.*
 
 @Composable
 fun App() {
-    // 1. Estado de rolagem
     val scrollState = rememberScrollState()
 
     MaterialTheme(
@@ -31,7 +30,6 @@ fun App() {
         var token   by remember { mutableStateOf<String?>(null) }
         var userDto by remember { mutableStateOf<MerchantUserDto?>(null) }
 
-        // 2. Recupera token salvo, se houver
         LaunchedEffect(Unit) {
             TokenStore.token
                 ?.takeIf(JwtUtils::isValid)

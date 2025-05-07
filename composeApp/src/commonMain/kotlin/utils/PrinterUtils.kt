@@ -3,6 +3,7 @@ import com.github.anastaciocintra.escpos.Style
 import com.github.anastaciocintra.output.PrinterOutputStream
 import javax.print.PrintServiceLookup
 
+
 private fun ptsToFontSize(pts: Float): Style.FontSize = when (pts.toInt()) {
     in  0..11 -> Style.FontSize._1
     in 12..17 -> Style.FontSize._2
@@ -14,51 +15,70 @@ private fun ptsToFontSize(pts: Float): Style.FontSize = when (pts.toInt()) {
     else      -> Style.FontSize._8
 }
 
+
+
+
 fun printText(
     printerName: String?,
     text: String,
-    widthMm: String,
-    fontSizePt: String,
-    marginMm: String,
-    spacingPt: String
+    widthMmStr: String,
+    fontSizePtStr: String,
+    marginMmStr: String,
+    spacingPtStr: String
 ) {
-    val service = PrintServiceLookup.lookupPrintServices(null, null)
-        .firstOrNull { it.name == printerName }
-        ?: run {
-            println("Impressora \"$printerName\" não encontrada."); return
-        }
-
-    val colPerLine = when ((widthMm.toFloatOrNull() ?: 58f).toInt()) {
-        in 70..79 -> 48 else -> 32
+    // 1) Nome da impressora não pode ser nulo
+    val name = printerName ?: run {
+        println("❌ printerName é nulo"); return
     }
-    val marginSpaces = ((marginMm.toFloatOrNull() ?: 0f) / 58f * colPerLine).toInt()
-        .coerceAtMost(colPerLine / 4)
 
-    val indent  = " ".repeat(marginSpaces)
-    val maxLine = colPerLine - marginSpaces
+    // 2) Converte String → Float/Int com defaults
+    val widthMm    = widthMmStr.toFloatOrNull()    ?: 58f
+    val fontSizePt = fontSizePtStr.toFloatOrNull() ?: 10f
+    val marginMm   = marginMmStr.toFloatOrNull()   ?: 0f
+    val spacingPt  = spacingPtStr.toIntOrNull()
+        ?.coerceIn(1, 255)                        // 1 ≤ n ≤ 255
+        ?: 3                                      // fallback mínimo
 
-    val wrapped = buildList {
-        text.split('\n').forEach { raw ->
-            var cur = ""
-            raw.split(' ').forEach { word ->
-                if (cur.isEmpty()) cur = word
-                else if (cur.length + 1 + word.length <= maxLine) cur += " $word"
-                else { add(cur); cur = word }
+    // 3) Pega o serviço (usa BYTE_ARRAY.AUTOSENSE)
+    val service = try {
+        PrinterOutputStream.getPrintServiceByName(name)
+    } catch (e: IllegalArgumentException) {
+        println("❌ Impressora \"$name\" não encontrada"); return
+    }
+
+    PrinterOutputStream(service).use { out ->
+        EscPos(out).use { esc ->
+            esc.initializePrinter()
+            esc.setCharacterCodeTable(EscPos.CharacterCodeTable.CP850_Multilingual)
+
+            val cols = if (widthMm >= 70f) 48 else 32
+            val marginSpaces = ((marginMm / widthMm) * cols)
+                .toInt()
+                .coerceAtMost(cols / 4)
+            val indent = " ".repeat(marginSpaces)
+            val maxLine = cols - marginSpaces
+
+            val wrapped = text.lines().flatMap { raw ->
+                raw.split(' ').fold(mutableListOf<String>()) { acc, w ->
+                    if (acc.isEmpty() || acc.last().length + 1 + w.length > maxLine) {
+                        acc.add(w)
+                    } else {
+                        acc[acc.lastIndex] = acc.last() + " $w"
+                    }
+                    acc
+                }
             }
-            if (cur.isNotBlank()) add(cur)
-        }
-    }
 
-    PrinterOutputStream(service).use { stream ->
-        EscPos(stream).use { esc ->
-            val size = ptsToFontSize(fontSizePt.toFloatOrNull() ?: 10f)
-            val style = Style().setFontSize(size, size)
+            val fontSize = if (fontSizePt >= 24f)
+                Style.FontSize._2
+            else
+                Style.FontSize._1
+            val style = Style().setFontSize(fontSize, fontSize)
 
-            spacingPt.toFloatOrNull()?.let { esc.feed(it.toInt()) }
+            wrapped.forEach { esc.writeLF(style, indent + it) }
 
-            for (line in wrapped) esc.write(style, indent + line).feed(1)
-
-            esc.feed(3).cut(EscPos.CutMode.FULL)
+            esc.feed(spacingPt)
+            esc.cut(EscPos.CutMode.FULL)
         }
     }
 }
