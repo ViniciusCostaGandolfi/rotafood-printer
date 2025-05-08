@@ -24,50 +24,50 @@ fun PrinterTestButton(
     spacingBetweenPrints: String
 ) {
     val sampleText = """
-        ---------------------
-        
-        --- COMANDA TESTE ---
-        
-        Pedido: 1234
-        
-        Data: 27/04/2025
-        
-        Canal: APP
-        
-        Tipo: Entrega
-        
-        Status: Confirmado
-        
-        ---------------------
-        
-        Entrega: Rua Exemplo, 123 - Centro
-        
-        ---------------------
-        
-        (2) Hambúrguer R$ 25,00
-        
-           - Bacon R$ 5,00
-           
-           - Queijo Extra R$ 3,00
-           
-        (1) Refrigerante R$ 8,00
-        
-        ---------------------
-        
-        Total: R$ 123,00
-        
-        Info extra: Sem dlfkjasdl dlfkjasdl flsdkjfalnl dlisfjslmnl sdlkfj   
+---------------------
+
+--- COMANDA TESTE ---
+
+Pedido: 1234
+
+Data: 27/04/2025
+
+Canal: APP
+
+Tipo: Entrega
+
+Status: Confirmado
+
+---------------------
+
+Entrega: Rua Exemplo, 123 - Centro
+
+---------------------
+
+(2) Hambúrguer R$ 25,00
+
+   - Bacon R$ 5,00
+   
+   - Queijo Extra R$ 3,00
+   
+(1) Refrigerante R$ 8,00
+
+---------------------
+
+Total: R$ 123,00
+
+Info extra: Sem dlfkjasdl dlfkjasdl flsdkjfalnl dlisfjslmnl sdlkfj   
         """
 
     Button(
         onClick = {
             printText(
-                printerName = selectedPrinter,
-                text        = sampleText,
-                widthMmStr     = pageWidth,
-                fontSizePtStr  = fontSize,
-                marginMmStr    = pageMargin,
-                spacingPtStr   = spacingBetweenPrints
+                selectedPrinter,
+                sampleText,
+                pageWidth,
+                fontSize,
+                pageMargin,
+                spacingBetweenPrints
             )
         },
         enabled = selectedPrinter != null,

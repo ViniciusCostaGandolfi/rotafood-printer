@@ -1,22 +1,8 @@
-import com.github.anastaciocintra.escpos.EscPos
-import com.github.anastaciocintra.escpos.Style
-import com.github.anastaciocintra.output.PrinterOutputStream
+import java.io.ByteArrayOutputStream
+import javax.print.DocFlavor
 import javax.print.PrintServiceLookup
-
-
-private fun ptsToFontSize(pts: Float): Style.FontSize = when (pts.toInt()) {
-    in  0..11 -> Style.FontSize._1
-    in 12..17 -> Style.FontSize._2
-    in 18..23 -> Style.FontSize._3
-    in 24..29 -> Style.FontSize._4
-    in 30..35 -> Style.FontSize._5
-    in 36..41 -> Style.FontSize._6
-    in 42..47 -> Style.FontSize._7
-    else      -> Style.FontSize._8
-}
-
-
-
+import javax.print.SimpleDoc
+import kotlin.math.roundToInt
 
 fun printText(
     printerName: String?,
@@ -24,61 +10,52 @@ fun printText(
     widthMmStr: String,
     fontSizePtStr: String,
     marginMmStr: String,
-    spacingPtStr: String
+    lineSpacingPtStr: String,
+    linesToFeed: Int = 4
 ) {
-    // 1) Nome da impressora não pode ser nulo
-    val name = printerName ?: run {
-        println("❌ printerName é nulo"); return
+    val service = PrintServiceLookup.lookupPrintServices(null, null)
+        .firstOrNull { it.name.equals(printerName, ignoreCase = true) }
+        ?: error("Impressora '$printerName' não encontrada")
+
+    val widthMm       = widthMmStr.toFloatOrNull()     ?: 58f
+    val fontSizePt    = fontSizePtStr.toFloatOrNull()  ?: 10f
+    val marginMm      = marginMmStr.toFloatOrNull()    ?: 0f
+    val lineSpacingPt = lineSpacingPtStr.toIntOrNull() ?: 30
+
+
+    val cols         = if (widthMm >= 70f) 48 else 32
+    val marginCols   = ((marginMm / widthMm) * cols).roundToInt().coerceAtMost(cols/4)
+    val indent       = " ".repeat(marginCols)
+
+    val multiplier = when {
+        fontSizePt <= 11f -> 1
+        fontSizePt <= 17f -> 2
+        fontSizePt <= 23f -> 3
+        fontSizePt <= 29f -> 4
+        fontSizePt <= 35f -> 5
+        fontSizePt <= 41f -> 6
+        fontSizePt <= 47f -> 7
+        else              -> 8
     }
+    val sizeByte = ((multiplier - 1) shl 4) or (multiplier - 1)
 
-    // 2) Converte String → Float/Int com defaults
-    val widthMm    = widthMmStr.toFloatOrNull()    ?: 58f
-    val fontSizePt = fontSizePtStr.toFloatOrNull() ?: 10f
-    val marginMm   = marginMmStr.toFloatOrNull()   ?: 0f
-    val spacingPt  = spacingPtStr.toIntOrNull()
-        ?.coerceIn(1, 255)                        // 1 ≤ n ≤ 255
-        ?: 3                                      // fallback mínimo
+    val lineSpacingDots = (lineSpacingPt * (203f/72f)).roundToInt().coerceIn(0,255)
 
-    // 3) Pega o serviço (usa BYTE_ARRAY.AUTOSENSE)
-    val service = try {
-        PrinterOutputStream.getPrintServiceByName(name)
-    } catch (e: IllegalArgumentException) {
-        println("❌ Impressora \"$name\" não encontrada"); return
-    }
+    val baos = ByteArrayOutputStream().apply {
+        write(0x1B); write(0x40)
+        write(0x1D); write(0x21); write(sizeByte)
+        write(0x1B); write(0x33); write(lineSpacingDots)
 
-    PrinterOutputStream(service).use { out ->
-        EscPos(out).use { esc ->
-            esc.initializePrinter()
-            esc.setCharacterCodeTable(EscPos.CharacterCodeTable.CP850_Multilingual)
-
-            val cols = if (widthMm >= 70f) 48 else 32
-            val marginSpaces = ((marginMm / widthMm) * cols)
-                .toInt()
-                .coerceAtMost(cols / 4)
-            val indent = " ".repeat(marginSpaces)
-            val maxLine = cols - marginSpaces
-
-            val wrapped = text.lines().flatMap { raw ->
-                raw.split(' ').fold(mutableListOf<String>()) { acc, w ->
-                    if (acc.isEmpty() || acc.last().length + 1 + w.length > maxLine) {
-                        acc.add(w)
-                    } else {
-                        acc[acc.lastIndex] = acc.last() + " $w"
-                    }
-                    acc
-                }
-            }
-
-            val fontSize = if (fontSizePt >= 24f)
-                Style.FontSize._2
-            else
-                Style.FontSize._1
-            val style = Style().setFontSize(fontSize, fontSize)
-
-            wrapped.forEach { esc.writeLF(style, indent + it) }
-
-            esc.feed(spacingPt)
-            esc.cut(EscPos.CutMode.FULL)
+        text.lines().forEach { line ->
+            write((indent + line).toByteArray(Charsets.ISO_8859_1))
+            write(0x0A)
         }
+
+        write(0x1B); write(0x32)
+        write(0x1B); write(0x64); write(linesToFeed)
+        write(0x1D); write(0x56); write(0x00)
     }
+
+    val doc = SimpleDoc(baos.toByteArray(), DocFlavor.BYTE_ARRAY.AUTOSENSE, null)
+    service.createPrintJob().print(doc, null)
 }

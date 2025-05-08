@@ -15,9 +15,9 @@ fun currentVersion(): String =
         ?: "1.0.0"
 
 fun main() = application {
-    runBlocking {
-        UpdateCheckerWidget.run(currentVersion())
-    }
+//    runBlocking {
+//        UpdateCheckerWidget.run(currentVersion())
+//    }
 
     Window(
         onCloseRequest = ::exitApplication,

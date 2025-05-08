@@ -42,37 +42,37 @@ fun PrinterManagerPage(
     val scope = rememberCoroutineScope()
     var wsPrinter by remember { mutableStateOf<WsPrinter?>(null) }
 
-    fun startWs() {
-        val printerName = selectedPrinter ?: return
-        val service = PrintServiceLookup.lookupPrintServices(null, null)
-            .firstOrNull { it.name == printerName } ?: return
+//    fun startWs() {
+//        val printerName = selectedPrinter ?: return
+//        PrintServiceLookup.lookupPrintServices(null, null)
+//            .firstOrNull { it.name == printerName } ?: return
+//
+//        wsPrinter?.stop()
+//        wsPrinter = WsPrinter(
+//            token        = token,
+//            printerName  = selectedPrinter,
+//            widthMm      = pageWidth,
+//            heightMm     = pageHeight,
+//            fontSizePt   = fontSize,
+//            marginMm     = pageMargin
+//        ).also { printer ->
+//            scope.launch {
+//                printer.start()
+//                connected = true
+//            }
+//        }
+//    }
 
-        wsPrinter?.stop()
-        wsPrinter = WsPrinter(
-            token        = token,
-            printerName  = selectedPrinter,
-            widthMm      = pageWidth,
-            heightMm     = pageHeight,
-            fontSizePt   = fontSize,
-            marginMm     = pageMargin
-        ).also { printer ->
-            scope.launch {
-                printer.start()
-                connected = true
-            }
-        }
-    }
+//
+//    fun stopWs() {
+//        wsPrinter?.stop()
+//        wsPrinter = null
+//        connected = false
+//    }
 
+    LaunchedEffect(selectedPrinter, pageWidth) {  }
 
-    fun stopWs() {
-        wsPrinter?.stop()
-        wsPrinter = null
-        connected = false
-    }
-
-    LaunchedEffect(selectedPrinter, pageWidth) { startWs() }
-
-    DisposableEffect(Unit) { onDispose { stopWs() } }
+//    DisposableEffect(Unit) { onDispose { stopWs() } }
 
 
     Column(
@@ -92,7 +92,7 @@ fun PrinterManagerPage(
             val color = if (connected) Color(0xFF2E7D32) else MaterialTheme.colors.error
             val text  = if (connected) "Conectado ✓" else "Desconectado"
             Text(text, Modifier.weight(1f), color = color)
-            if (!connected) Button(onClick = ::startWs) { Text("Reconectar") }
+//            if (!connected) Button(onClick = ::startWs) { Text("Reconectar") }
         }
 
         Divider()
