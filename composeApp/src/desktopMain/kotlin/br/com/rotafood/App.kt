@@ -22,42 +22,55 @@ fun App() {
 
     MaterialTheme(
         colors = lightColors(
-            primary        = Color(0xFF1565C0),
+            primary = Color(0xFF1565C0),
             primaryVariant = Color(0xFF003c8f),
-            secondary      = Color(0xFF1565C0),
+            secondary = Color(0xFF1565C0),
         )
     ) {
-        var token   by remember { mutableStateOf<String?>(null) }
+        var token by remember { mutableStateOf<String?>(null) }
         var userDto by remember { mutableStateOf<MerchantUserDto?>(null) }
 
         LaunchedEffect(Unit) {
-            TokenStore.token
-                ?.takeIf(JwtUtils::isValid)
-                ?.let {
-                    token   = it
-                    userDto = JwtUtils.decode(it)
+            TokenStore.token?.let { saved ->
+                if (JwtUtils.isValid(saved)) {
+                    val finalToken = if (JwtUtils.shouldRefresh(saved)) {
+                        try {
+                            val fresh = AuthApi.refreshToken(saved)
+                            TokenStore.token = fresh
+                            fresh
+                        } catch (e: Exception) {
+                            saved
+                        }
+                    } else {
+                        saved
+                    }
+
+                    token = finalToken
+                    userDto = JwtUtils.decode(finalToken)
                 }
+            }
         }
 
         Box {
             Column(
-                modifier = Modifier
+                Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState)
+                    .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
                 if (token == null) {
                     TokenGatePage { newToken ->
-                        token   = newToken
+                        TokenStore.token = newToken
+                        token = newToken
                         userDto = JwtUtils.decode(newToken)
                     }
                 } else {
                     PrinterManagerPage(
-                        user     = userDto!!,
-                        token    = token!!,
+                        user = userDto!!,
+                        token = token!!,
                         onLogout = {
                             TokenStore.token = null
-                            token   = null
+                            token = null
                             userDto = null
                         }
                     )
@@ -65,7 +78,7 @@ fun App() {
             }
 
             VerticalScrollbar(
-                adapter  = rememberScrollbarAdapter(scrollState),
+                adapter = rememberScrollbarAdapter(rememberScrollState()),
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()

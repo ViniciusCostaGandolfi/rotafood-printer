@@ -20,10 +20,9 @@ fun PrinterTestButton(
     selectedPrinter: String?,
     pageWidth: String,
     fontSize: String,
-    pageMargin: String,
-    spacingBetweenPrints: String
+    pageMargin: String
 ) {
-    val sampleText = """
+    val textSample = """
 ---------------------
 
 --- COMANDA TESTE ---
@@ -63,11 +62,10 @@ Info extra: Sem dlfkjasdl dlfkjasdl flsdkjfalnl dlisfjslmnl sdlkfj
         onClick = {
             printText(
                 selectedPrinter,
-                sampleText,
+                textSample,
                 pageWidth,
                 fontSize,
                 pageMargin,
-                spacingBetweenPrints
             )
         },
         enabled = selectedPrinter != null,
