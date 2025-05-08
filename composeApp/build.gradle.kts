@@ -33,8 +33,15 @@ kotlin {
             implementation("com.github.anastaciocintra:escpos-coffee:4.1.0")
             implementation("org.usb4java:usb4java:1.3.0")
             implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
-            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
             implementation("io.ktor:ktor-client-okhttp:2.3.7")
+
+            implementation("io.ktor:ktor-server-core:2.3.7")
+            implementation("io.ktor:ktor-server-netty:2.3.7")
+            implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
 
 
         }
@@ -45,6 +52,14 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
             implementation("org.slf4j:slf4j-simple:2.0.7")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+
+
+            implementation("io.ktor:ktor-server-core:2.3.7")
+            implementation("io.ktor:ktor-server-netty:2.3.7")
+            implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 
         }
 

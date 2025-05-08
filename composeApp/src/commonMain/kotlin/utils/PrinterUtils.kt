@@ -41,7 +41,7 @@ fun printText(
 
     val lineSpacingDots = (lineSpacingPt * (203f/72f)).roundToInt().coerceIn(0,255)
 
-    val baos = ByteArrayOutputStream().apply {
+    val bytes = ByteArrayOutputStream().apply {
         write(0x1B); write(0x40)
         write(0x1D); write(0x21); write(sizeByte)
         write(0x1B); write(0x33); write(lineSpacingDots)
@@ -56,6 +56,6 @@ fun printText(
         write(0x1D); write(0x56); write(0x00)
     }
 
-    val doc = SimpleDoc(baos.toByteArray(), DocFlavor.BYTE_ARRAY.AUTOSENSE, null)
+    val doc = SimpleDoc(bytes.toByteArray(), DocFlavor.BYTE_ARRAY.AUTOSENSE, null)
     service.createPrintJob().print(doc, null)
 }
