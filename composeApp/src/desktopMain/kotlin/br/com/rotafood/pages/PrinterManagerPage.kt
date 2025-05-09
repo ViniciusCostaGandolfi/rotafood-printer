@@ -51,7 +51,6 @@ fun PrinterManagerPage(
             token        = token,
             printerName  = selectedPrinter,
             widthMm      = pageWidth,
-            heightMm     = pageHeight,
             fontSizePt   = fontSize,
             marginMm     = pageMargin
         ).also { printer ->

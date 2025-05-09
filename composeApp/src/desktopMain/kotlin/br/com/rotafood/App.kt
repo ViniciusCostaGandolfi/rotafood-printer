@@ -18,8 +18,6 @@ import utils.*
 
 @Composable
 fun App() {
-    val scrollState = rememberScrollState()
-
     MaterialTheme(
         colors = lightColors(
             primary = Color(0xFF1565C0),
