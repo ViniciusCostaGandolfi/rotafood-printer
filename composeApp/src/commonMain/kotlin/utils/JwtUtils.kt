@@ -9,39 +9,45 @@ object JwtUtils {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun decode(token: String): MerchantUserDto? = try {
-        val payload = token.split(".").getOrNull(1) ?: return null
-        val jsonStr = Base64.getUrlDecoder().decode(payload).toString(Charsets.UTF_8)
-        val root    = json.parseToJsonElement(jsonStr).jsonObject
+    fun decode(token: String): MerchantUserDto? {
+        return try {
+            val payload = token.split(".").getOrNull(1) ?: return null
+            val jsonStr = Base64.getUrlDecoder().decode(payload).toString(Charsets.UTF_8)
+            val root    = json.parseToJsonElement(jsonStr).jsonObject
 
-        val merchantUserElement = root["merchantUser"] ?: return null
-        json.decodeFromJsonElement<MerchantUserDto>(merchantUserElement)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
+            val merchantUserElement = root["merchantUser"] ?: return null
+            json.decodeFromJsonElement<MerchantUserDto>(merchantUserElement)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
-    private fun parsePayload(token: String): JsonObject? = try {
-        val payload = token.split(".").getOrNull(1) ?: return null
-        val jsonStr = Base64.getUrlDecoder()
-            .decode(payload)
-            .toString(Charsets.UTF_8)
-        json.parseToJsonElement(jsonStr).jsonObject
-    } catch (_: Exception) {
-        null
+    private fun parsePayload(token: String): JsonObject? {
+        return try {
+            val payload = token.split(".").getOrNull(1) ?: return null
+            val jsonStr = Base64.getUrlDecoder()
+                .decode(payload)
+                .toString(Charsets.UTF_8)
+            json.parseToJsonElement(jsonStr).jsonObject
+        } catch (_: Exception) {
+            null
+        }
     }
 
 
-    fun isValid(token: String): Boolean = try {
-        val parts = token.split(".")
+    fun isValid(token: String): Boolean {
+        return try {
+            val parts = token.split(".")
 
-        val payload = parts[1]
-        val jsonStr = Base64.getUrlDecoder().decode(payload).toString(Charsets.UTF_8)
-        val root    = json.parseToJsonElement(jsonStr).jsonObject
+            val payload = parts[1]
+            val jsonStr = Base64.getUrlDecoder().decode(payload).toString(Charsets.UTF_8)
+            val root    = json.parseToJsonElement(jsonStr).jsonObject
 
-        val exp = root["exp"]?.jsonPrimitive?.longOrNull ?: return false
-        exp > Date().time / 1000
-    } catch (_: Exception) { false }
+            val exp = root["exp"]?.jsonPrimitive?.longOrNull ?: return false
+            exp > Date().time / 1000
+        } catch (_: Exception) { false }
+    }
 
     private fun getExp(token: String): Long? {
         val root = parsePayload(token) ?: return null
