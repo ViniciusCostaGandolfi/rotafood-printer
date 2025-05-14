@@ -16,6 +16,7 @@ import br.com.rotafood.pages.TokenGatePage
 import model.MerchantUserDto
 import utils.*
 
+
 @Composable
 fun App() {
     MaterialTheme(

@@ -35,12 +35,13 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-client-okhttp:2.3.7")
 
-            implementation("io.ktor:ktor-server-core:2.3.7")
-            implementation("io.ktor:ktor-server-netty:2.3.7")
-            implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
-            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+            implementation(compose.material3)
 
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing")
+
 
 
 
@@ -52,8 +53,7 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
             implementation("org.slf4j:slf4j-simple:2.0.7")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
 
             implementation("io.ktor:ktor-server-core:2.3.7")
@@ -61,12 +61,26 @@ kotlin {
             implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 
+            implementation(compose.material3)
+
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing")
+
+
         }
 
     }
 }
 
-
+configurations.all {
+    resolutionStrategy {
+        force(
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3"
+        )
+    }
+}
 
 compose {
     resources {

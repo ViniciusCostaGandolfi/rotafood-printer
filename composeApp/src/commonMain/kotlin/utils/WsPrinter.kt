@@ -26,7 +26,7 @@ class WsPrinter(
 
     fun start() = scope.launch {
         client.webSocket(
-            urlString = "wss://rotafood-api-production.up.railway.app/v1/ws/print?token=$token",
+            urlString = "ws://localhost:8080/v1/ws/print?token=$token",
         ) {
             println("WS conectado ✓")
             for (msg in incoming) {
@@ -37,14 +37,12 @@ class WsPrinter(
                             printerName,
                             text,
                             widthMm,
-                            fontSizePt,
                             marginMm
                         )
                     }
                     is Frame.Text -> printText( printerName,
                         msg.readText(),
                         widthMm,
-                        fontSizePt,
                         marginMm)
                     else -> {}
                 }

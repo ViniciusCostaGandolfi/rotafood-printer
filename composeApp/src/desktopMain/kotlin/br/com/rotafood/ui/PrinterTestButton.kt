@@ -49,13 +49,13 @@ Entrega: Rua Exemplo, 123 - Centro
    
    - Queijo Extra R$ 3,00
    
-(1) Refrigerante R$ 8,00
+(1) Porção de Batata Frita P R$ 8,00
 
 ---------------------
 
 Total: R$ 123,00
 
-Info extra: Sem dlfkjasdl dlfkjasdl flsdkjfalnl dlisfjslmnl sdlkfj   
+Info extra: Info Extra   
         """
 
     Button(
@@ -64,7 +64,6 @@ Info extra: Sem dlfkjasdl dlfkjasdl flsdkjfalnl dlisfjslmnl sdlkfj
                 selectedPrinter,
                 textSample,
                 pageWidth,
-                fontSize,
                 pageMargin,
             )
         },
