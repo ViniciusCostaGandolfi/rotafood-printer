@@ -10,8 +10,6 @@ plugins {
 version = "1.0.0"
 
 kotlin {
-    jvmToolchain(11)
-
     jvm("desktop")
 
     sourceSets {
@@ -57,9 +55,11 @@ kotlin {
 
 
             implementation("io.ktor:ktor-server-core:2.3.7")
-            implementation("io.ktor:ktor-server-netty:2.3.7")
             implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
             implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+            implementation("io.ktor:ktor-server-netty:2.3.7")
+            implementation("io.ktor:ktor-server-cors-jvm:2.3.7")
+
 
             implementation(compose.material3)
 

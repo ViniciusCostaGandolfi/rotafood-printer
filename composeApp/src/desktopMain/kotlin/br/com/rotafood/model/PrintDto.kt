@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class PrintDto(
     val printerName: String,
     val text: String,
-    val columns: Int,
-    val fontSizePt: Int,
-    val widthMm: Float
+    val marginPt: Int,
+    val widthMm: Int,
+    val useStyle: Boolean
 )
