@@ -1,4 +1,4 @@
-package utils
+package br.com.rotafood.utils
 
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -9,21 +9,29 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import model.PrintDto
-import printText
 
 fun Application.PrintApi() {
     install(CORS) {
-        anyHost()
-        allowNonSimpleContentTypes = true
-        allowMethod(HttpMethod.Options)
+        allowHost("localhost:4200", schemes = listOf("http"))
+        allowHost("127.0.0.1:4200", schemes = listOf("http"))
+
+        allowHost("rotafood.com.br", schemes = listOf("https"))
+
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Options)
+
         allowHeader(HttpHeaders.ContentType)
-        allowCredentials = true
+        allowHeader(HttpHeaders.Authorization)
+
+        allowNonSimpleContentTypes = true
+        allowCredentials = false
     }
+
+
+
     install(ContentNegotiation) { json() }
 
     routing {

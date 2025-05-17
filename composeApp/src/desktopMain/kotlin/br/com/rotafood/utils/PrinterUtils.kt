@@ -1,3 +1,5 @@
+package br.com.rotafood.utils
+
 import com.github.anastaciocintra.escpos.EscPos
 import com.github.anastaciocintra.escpos.Style
 import com.github.anastaciocintra.output.PrinterOutputStream

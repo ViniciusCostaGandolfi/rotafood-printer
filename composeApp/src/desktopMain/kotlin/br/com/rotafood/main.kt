@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
@@ -19,12 +18,11 @@ import androidx.compose.ui.window.application
 import br.com.rotafood.res.Res
 import br.com.rotafood.res.iconPng
 import br.com.rotafood.res.rotafoodLogo
-import utils.PrintApi
+import br.com.rotafood.utils.PrintApi
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.*
 import org.jetbrains.compose.resources.painterResource
-import printText
 import java.awt.Desktop
 import java.net.URI
 
@@ -40,8 +38,6 @@ fun main() = application {
             server.start(wait = true)
         }
     }
-
-    val uiScope = rememberCoroutineScope()
 
     Window(
         onCloseRequest = {
@@ -78,31 +74,6 @@ fun main() = application {
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 Text("Abrir Gestor de Pedidos")
-            }
-
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xFF0052C8),
-                    contentColor    = Color.White
-                ),
-                onClick = {
-                    uiScope.launch(Dispatchers.IO) {
-                        try {
-                            printText(
-                                printerName = "POS58",
-                                text        = "=== TESTE DE IMPRESSÃO ===\nRotaFood OK!",
-                                widthMm     = 58,
-                                marginPt    = 0,
-                                useStyle    = false
-                            )
-                            println("Teste de impressão enviado com sucesso")
-                        } catch (e: Exception) {
-                            println("Falha no teste de impressão: ${e.message}")
-                        }
-                    }
-                }
-            ) {
-                Text("Testar Impressão")
             }
         }
     }
