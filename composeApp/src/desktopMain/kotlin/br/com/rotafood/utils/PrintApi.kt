@@ -19,6 +19,9 @@ fun Application.PrintApi() {
 
         allowHost("rotafood.com.br", schemes = listOf("https"))
 
+        allowHost("rotafood.com.br", schemes = listOf("http"))
+
+
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
         allowMethod(HttpMethod.Options)
